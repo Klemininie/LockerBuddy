@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Wire.h>
 
 enum SchDay{
   Mon, Tue, Wed, Thu, Fri
@@ -18,38 +19,73 @@ class Subject{
   };
 };
 
-struct 
-
 
 // The Subject Pool
-Subject Elec2("SCL", 0x1);
-Subject Hlth("Health", 0x2);
-Subject Math("Mathematics", 0x3);
-Subject _Tle("TLE", 0x4);
-Subject Hmrm("Homeroom", 0x5);
-Subject Comp("Computer", 0x6);
-Subject Elec1("Advanced Statistics", 0x7);
-Subject ArlP("Araling Panlipunan", 0x8);
-Subject Fili("Filipino", 0x9);
-Subject Engl("English", 0xA);
-Subject Arts("Arts", 0xB);
-Subject Scnce("Science", 0xC);
-Subject Music("Music", 0xD);
-Subject PysEd("Physical Education", 0xE);
-Subject ValEd("Values Education", 0xF);
-Subject Health("Health", 0x10);
-Subject Enrch("Enrichment", 0x11);
+
+Subject SubjectPool[] = {
+
+SubjectPool("SCL", 0x1),
+SubjectPool("Health", 0x2),
+SubjectPool("Mathematics", 0x3),
+SubjectPool("TLE", 0x4),
+SubjectPool("Homeroom", 0x5),
+SubjectPool("Computer", 0x6),
+SubjectPool("Advanced Statistics", 0x7),
+SubjectPool("Araling Panlipunan", 0x8),
+SubjectPool("Filipino", 0x9),
+SubjectPool("English", 0xA),
+SubjectPool("Arts", 0xB),
+SubjectPool("Science", 0xC),
+SubjectPool("Music", 0xD),
+SubjectPool("Physical Education", 0xE),
+SubjectPool("Values Education", 0xF),
+SubjectPool("Health", 0x10),
+SubjectPool("Enrichment", 0x11)
+};
+
+Subject* getSubject(const char* name) {
+    for (auto& subj : SubjectPool) {
+        if (subj.Name == name) return &subj;
+    }
+    return nullptr;
+}
 
 Subject* Sarr[5][7] = {
-  {&Elec2, &Hlth, &_Tle, &_Tle, &Comp, &Elec1, &ArlP},  //Monday
-  {&Fili, &ArlP, &Engl, &Arts, &Scnce, &Math, &Enrch},  //Tuesday
-  {&Fili, &Scnce, &Engl, &Music, &PysEd, &Math, &_Tle},  //Wednesday
-  {&Fili, &Scnce, &Engl, &ValEd, &ArlP, &Math, &Enrch},  //Thursday
-  {&Fili, &Scnce, &Engl, &ValEd, &Comp, &Math, nullptr} //Friday (nullptr == no subj)
+    {getSubject("SCL"), getSubject("Health"), getSubject("TLE"), getSubject("TLE"), getSubject("Computer"), getSubject("Advanced Statistics"), getSubject("Araling Panlipunan")},
+    {getSubject("Filipino"), getSubject("Araling Panlipunan"), getSubject("English"), getSubject("Arts"), getSubject("Science"), getSubject("Mathematics"), getSubject("Enrichment")},
+    {getSubject("Filipino"), getSubject("Science"), getSubject("English"), getSubject("Music"), getSubject("Physical Education"), getSubject("Mathematics"), getSubject("TLE")},
+    {getSubject("Filipino"), getSubject("Science"), getSubject("English"), getSubject("Values Education"), getSubject("Araling Panlipunan"), getSubject("Mathematics"), getSubject("Enrichment")},
+    {getSubject("Filipino"), getSubject("Science"), getSubject("English"), getSubject("Values Education"), getSubject("Computer"), getSubject("Mathematics"), nullptr}
 };
 
 // Create RFID stuff for RC522
-// Create IO Ext stuff for 
+// I need to know pins first
+
+class RFid {
+
+  byte IRQ;
+  byte Transmit;
+  byte Receive;
+
+  void Write(int t)
+  {
+  Wire.begin();
+  Wire.write(t);
+  Wire.end();
+  }
+
+  void Read(int t)
+  {
+  Wire.begin();
+  Wire.write(t);
+  Wire.end();
+  }
+};
+
+class Relay{
+  byte pib;
+  byte state;
+};
 
 void setup()
 {
