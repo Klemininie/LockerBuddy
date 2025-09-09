@@ -4,7 +4,6 @@
 enum SchDay{
   Mon, Tue, Wed, Thu, Fri
 };
-
 // Create Class Subject
 class Subject{
   public:
