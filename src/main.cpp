@@ -36,7 +36,7 @@ inline void Shift(ShiftReg* SS){digitalWrite(SS->pins._CS, true);}*/
 //                                Turn On objs
 template <typename T, int N>
 inline void on_obj(const T (&arrobj)[N]){ // Pass a reference as an array arrobj
-  for(obj& rr : arrobj)                   // For each rr of arrobj, digitalWrite
+  for(obj& rr : arrobj)           1         // For each rr of arrobj, digitalWrite
   {
     rr.digitalWrite(HIGH);
   }
