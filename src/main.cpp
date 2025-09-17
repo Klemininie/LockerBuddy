@@ -1,11 +1,12 @@
 #include <Arduino.h>
+#include <GPIO.h>
 #include <MFRC522.h>
 #include <SPI.h>
 
 #define SS_PIN 8    //Pin 8 = select pin; Pin 7 = reset pin
 #define RST_PIN 7
-#define RR1 6   // Pin for relay 1 and relay 2
-#define RR2 5
+#define RelayO1 6   // Pin for obj 1 and obj 2
+#define RelayO2 5
 #define DELAY_OPEN 1000
 
 const byte security_uid[4] = {0x3F, 0xA6, 0xBB, 0xDE };
@@ -13,13 +14,8 @@ uint16_t security_uid_size = sizeof(security_uid) / sizeof(security_uid[0]);
 
 MFRC522 rfid(SS_PIN, RST_PIN);
 
-class Relay{
-public:
-  const byte pin;
-  bool state;
-    Relay(byte pin) : pin(pin) {state = false;}
-};
-const Relay arr[] = {Relay(RR1), Relay(RR2)};
+obj arr_of_relays_in_project[] = {obj(RelayO1), obj(RelayO2)}; // Array of objs
+const obj (&relays)[2] = arr_of_relays_in_project;             // reference to array
 
 /*class ShiftReg{        //DEPRECATED (NO SHIFT REGISTER FOR NOW...)
 protected: static byte _CLCK, _RCLCK, _SCLR;
@@ -37,32 +33,31 @@ inline void Shift(ShiftReg* SS){digitalWrite(SS->pins._CS, true);}*/
 //                           Project Utility Functions 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-//                                Turn On Relays
-inline void on_relay(const Relay (&arr)[2]){ // Pass a reference to an array arr with 2 members
-  for(const Relay& rr : arr)                 // For each pin rr of arr, use it for digitalWrite
+//                                Turn On objs
+template <typename T, int N>
+inline void on_obj(const T (&arrobj)[N]){ // Pass a reference as an array arrobj
+  for(obj& rr : arrobj)           1         // For each rr of arrobj, digitalWrite
   {
-    digitalWrite(rr.pin, HIGH);
+    rr.digitalWrite(HIGH);
   }
 }
 
-//                                  Vice versa
-inline void off_relay(const Relay (&arr)[2]){
-  for(const Relay& rr : arr)
+//                                 Vice versa
+template <typename T, int N>
+inline void off_obj(const T (&arr)[N]){
+  for(const obj& rr : arr)
   {
-    digitalWrite(rr.pin, false);
+    rr.digitalWrite(LOW);
   }
 }
 
 bool auth_uid(){
-  bool match = true;
-  for (byte i; i < rfid.uid.size; i++){
+  for (byte i = 0; i < rfid.uid.size; i++){
     if (rfid.uid.uidByte[i] != security_uid[i]){
-      match = false;
-      break;
+      return false;
     }
-
   }
-  return match;
+  return true;
 }
 
 void setup()
@@ -78,7 +73,7 @@ void loop()
 
   if (!rfid.PICC_ReadCardSerial()) return;
 
-  if (auth_uid) Serial.println("Access Granted");
+  if (auth_uid()) Serial.println("Access Granted");
   else Serial.println("Access Denied");
 
   rfid.PICC_HaltA();
